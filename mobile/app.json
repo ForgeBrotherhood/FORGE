@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "FORGE",
+    "slug": "forge",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "forge",
+    "userInterfaceStyle": "dark",
+
+    "splash": {
+      "backgroundColor": "#050608"
+    },
+
+    "assetBundlePatterns": ["**/*"],
+
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.forgebrotherhood.app"
+    },
+
+    "android": {
+      "package": "com.forgebrotherhood.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#050608"
+      }
+    },
+
+    "extra": {
+      "env": "dev",
+      "eas": {
+        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+      }
+    }
+  }
+}
