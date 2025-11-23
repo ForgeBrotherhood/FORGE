@@ -1,0 +1,43 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
+dist/
+build/
+coverage/
+.tmp/
+.temp/
+
+# Expo / React Native
+.expo/
+.expo-shared/
+*.expo/*
+android/
+ios/
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Env files (keep examples)
+.env
+.env.*
+!.env.example
+mobile/.env
+api/.env
+
+# Misc
+*.pid
+*.seed
+*.tgz
