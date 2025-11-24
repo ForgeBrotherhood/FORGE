@@ -2,6 +2,7 @@
 
 import React from "react";
 import {
+  ActivityIndicator,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -9,95 +10,104 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+
+import SettingToggle from "../components/SettingToggle";
+import DangerZoneSection from "../components/DangerZoneSection";
+import { useSettings } from "../hooks/useSettings";
+import { usePushNotifications } from "../../notifications/hooks/usePushNotifications";
 
 const SettingsScreen: React.FC = () => {
-  const navigation = useNavigation<any>();
+  const { settings, isSaving, setBoolean } = useSettings();
+  const {
+    status: pushStatus,
+    isRequesting,
+    error: pushError,
+    requestPermissionAndRegister
+  } = usePushNotifications();
 
-  const goTo = (routeName: string) => {
-    if (navigation && typeof navigation.navigate === "function") {
-      navigation.navigate(routeName as never);
-    }
-  };
+  const notificationsEnabled = pushStatus === "granted";
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.inner}>
+    <SafeAreaView style={styles.root}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.inner}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.header}>
           <Text style={styles.kicker}>SETTINGS</Text>
           <Text style={styles.title}>Tune your Forge</Text>
           <Text style={styles.subtitle}>
-            Adjust notifications, account details, and the fine print so the app
-            stays sharp and quiet in the background while you work.
+            Keep the Brotherhood and The Smith in your rhythm without letting
+            them become noise. This is where you tune the knobs. :contentReference[oaicite:1]{index=1}
           </Text>
         </View>
 
+        {/* App section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account</Text>
-          <TouchableOpacity
-            style={styles.row}
-            onPress={() => goTo("AccountSettings")}
-          >
-            <View>
-              <Text style={styles.rowLabel}>Profile & account</Text>
-              <Text style={styles.rowValue}>Name, email, login</Text>
-            </View>
-            <Text style={styles.chevron}>›</Text>
-          </TouchableOpacity>
+          <Text style={styles.sectionTitle}>App</Text>
+          <SettingToggle
+            label="Haptic feedback"
+            description="Subtle vibration on key actions (posting, completing prompts)."
+            value={settings.enableHaptics}
+            onValueChange={(value) => setBoolean("enableHaptics", value)}
+            disabled={isSaving}
+          />
         </View>
 
+        {/* Notifications section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Notifications</Text>
-          <TouchableOpacity
-            style={styles.row}
-            onPress={() => goTo("NotificationSettings")}
-          >
-            <View>
-              <Text style={styles.rowLabel}>Notification preferences</Text>
-              <Text style={styles.rowValue}>
-                Brotherhood, Smith, reminders
+
+          {pushError ? (
+            <Text style={styles.errorText}>{pushError}</Text>
+          ) : null}
+
+          {notificationsEnabled ? (
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Push notifications enabled</Text>
+              <Text style={styles.cardBody}>
+                This device is registered for FORGE notifications. Later we’ll tie
+                this into daily prompts, weekly reviews, and Brotherhood alerts.
               </Text>
             </View>
-            <Text style={styles.chevron}>›</Text>
-          </TouchableOpacity>
+          ) : (
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Push notifications off</Text>
+              <Text style={styles.cardBody}>
+                When you’re ready, enable notifications so Forge can nudge you at
+                the right moments – not all day, just high-signal reminders.
+              </Text>
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={requestPermissionAndRegister}
+                disabled={isRequesting}
+              >
+                {isRequesting ? (
+                  <ActivityIndicator />
+                ) : (
+                  <Text style={styles.buttonText}>Enable notifications</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Premium</Text>
-          <TouchableOpacity
-            style={styles.row}
-            onPress={() => goTo("Upgrade")}
-          >
-            <View>
-              <Text style={styles.rowLabel}>The Smith subscription</Text>
-              <Text style={styles.rowValue}>Manage or upgrade</Text>
-            </View>
-            <Text style={styles.chevron}>›</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
-          <TouchableOpacity
-            style={styles.row}
-            onPress={() => goTo("Legal")}
-          >
-            <View>
-              <Text style={styles.rowLabel}>Legal & privacy</Text>
-              <Text style={styles.rowValue}>Terms, privacy, Forge Code</Text>
-            </View>
-            <Text style={styles.chevron}>›</Text>
-          </TouchableOpacity>
-        </View>
+        {/* Danger zone */}
+        <DangerZoneSection />
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
     backgroundColor: "#050608"
+  },
+  scroll: {
+    flex: 1
   },
   inner: {
     flexGrow: 1,
@@ -127,38 +137,49 @@ const styles = StyleSheet.create({
     lineHeight: 20
   },
   section: {
-    marginTop: 16
+    marginTop: 18
   },
   sectionTitle: {
     color: "#9ca3af",
     fontSize: 13,
     marginBottom: 6
   },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    backgroundColor: "#020617",
+  card: {
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: "#111827",
-    justifyContent: "space-between"
+    backgroundColor: "#020617",
+    padding: 14
   },
-  rowLabel: {
+  cardTitle: {
     color: "#e5e7eb",
     fontSize: 15,
-    fontWeight: "600"
+    fontWeight: "600",
+    marginBottom: 4
   },
-  rowValue: {
+  cardBody: {
     color: "#9ca3af",
-    fontSize: 12,
-    marginTop: 2
+    fontSize: 13,
+    lineHeight: 20,
+    marginBottom: 10
   },
-  chevron: {
-    color: "#6b7280",
-    fontSize: 18,
-    marginLeft: 8
+  button: {
+    marginTop: 4,
+    alignSelf: "flex-start",
+    borderRadius: 999,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "#f97316"
+  },
+  buttonText: {
+    color: "#111827",
+    fontSize: 14,
+    fontWeight: "700"
+  },
+  errorText: {
+    color: "#f97373",
+    fontSize: 12,
+    marginBottom: 6
   }
 });
 
