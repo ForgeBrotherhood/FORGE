@@ -117,3 +117,12 @@ export async function deleteJournalEntry(
     next(err);
   }
 }
+
+// Aliases to match route names used earlier
+export {
+  listJournalEntries as listEntries,
+  getJournalEntry as getEntryById,
+  createJournalEntry as createEntry,
+  updateJournalEntry as updateEntry,
+  deleteJournalEntry as deleteEntry
+};
